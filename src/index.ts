@@ -1,17 +1,16 @@
 import { httpServer } from "./http_server/index.js";
-import { mouse, Point, up, down, left, right } from "@nut-tree/nut-js";
+import { mouse, up, down, left, right } from "@nut-tree/nut-js";
 import { WebSocketServer, WebSocket, createWebSocketStream} from "ws";
+import { Commands } from "./commands/model";
+import { mouse_position } from "./commands/mouse_position";
+import { mouse_up } from "./commands/mouse_up";
+import { mouse_down } from "./commands/mouse_down";
+import { mouse_left } from "./commands/mouse_left";
+import { mouse_right } from "./commands/mouse_right";
 
 enum Ports {
   HTTP_PORT = 8181,
   WS_PORT = 8182
-};
-enum Commands {
-  mouse_up = 'mouse_up',
-  mouse_down = 'mouse_down',
-  mouse_left = 'mouse_left',
-  mouse_right = 'mouse_right',
-  mouse_position = 'mouse_position'
 };
 
 console.log(`Start static http server on the ${Ports.HTTP_PORT} port!`);
@@ -25,38 +24,33 @@ wsServer.on('connection', (ws) => {
   console.log(`Start static web socket server on the ${Ports.WS_PORT} port!`);
 
   duplex.on('data', async (chunk) => {
-    duplex.pause();
     let [command, param1, param2] = chunk.split(' ');
-    const point = await mouse.getPosition();
+    const point = await mouse_position();
     param1 = parseInt(param1, 10);
     param2 = parseInt(param2, 10);
 
     switch (command) {
       case Commands.mouse_up:
-        await mouse.move(up(param1));
-        duplex.resume();
+        await mouse_up(param1);
         duplex.write(`${command}`);
         break;
       case Commands.mouse_down:
-        await mouse.move(down(param1));
-        duplex.resume();
+        await mouse_down(param1);
         duplex.write(`${command}`);
         break;
       case Commands.mouse_left:
-        await mouse.move(left(param1));
-        duplex.resume();
+        await mouse_left(param1);
         duplex.write(`${command}`);
         break;
       case Commands.mouse_right:
-        await mouse.move(right(param1));
-        duplex.resume();
+        await mouse_right(param1);
         duplex.write(`${command}`);
         break;
       case Commands.mouse_position:
-        duplex.resume();
         duplex.write(`${command} ${point.x}px,${point.y}px`);
         break;
       default:
+        duplex.write('Other commands not implemented');
         break;
     }
   });
