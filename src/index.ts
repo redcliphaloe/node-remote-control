@@ -1,7 +1,10 @@
-import { httpServer } from "./src/http_server/index.js";
+import { httpServer } from "./http_server/index.js";
 import { mouse } from "@nut-tree/nut-js";
+import * as ws from "ws";
 
 const HTTP_PORT = 8181;
 
 console.log(`Start static http server on the ${HTTP_PORT} port!`);
 httpServer.listen(HTTP_PORT);
+
+// new ws.WebSocketServer()
